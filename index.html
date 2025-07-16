@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Desafio Gamificação Academia TUU 2025</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#000000" />
+  <style>
+    @font-face {
+      font-family: 'DINBlack';
+      src: local('DIN Black'), local('DIN-Black'),
+           url('https://fonts.cdnfonts.com/s/15151/DINBlack.woff') format('woff');
+      font-weight: bold;
+    }
+
+    /* Extended splash screen (2 seconds) */
+    #splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      -webkit-backface-visibility: hidden;
+      -webkit-perspective: 1000;
+      -webkit-transform: translate3d(0,0,0);
+    }
+    
+    #splash-logo {
+      width: 150px;
+      height: 150px;
+      animation: pulse 2s ease-in-out;
+      -webkit-animation: pulse 2s ease-in-out;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    @-webkit-keyframes pulse {
+      0% { -webkit-transform: scale(0.9); opacity: 0.7; }
+      50% { -webkit-transform: scale(1.1); opacity: 1; }
+      100% { -webkit-transform: scale(1); opacity: 1; }
+    }
+
+    /* Dark/Light mode toggle button */
+    #theme-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #ffc400;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    #theme-toggle svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    #theme-toggle .sun-icon {
+      display: none;
+    }
+    
+    #theme-toggle .moon-icon {
+      display: block;
+    }
+    
+    .light-mode #theme-toggle .sun-icon {
+      display: block;
+    }
+    
+    .light-mode #theme-toggle .moon-icon {
+      display: none;
+    }
+
+    /* Rules button */
+    #rules-toggle {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #ffc400;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    #rules-toggle svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Rules dialog */
+    #rules-dialog {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+      color: white;
+    }
+    
+    .light-mode #rules-dialog {
+      background: rgba(255, 255, 255, 0.9);
+      color: black;
+    }
+    
+    #rules-content {
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 20px;
+      background: #000;
+      border: 2px solid #ffc400;
+      font-family: 'DINBlack', sans-serif;
+    }
+    
+    .light-mode #rules-content {
+      background: #fff;
+      border: 2px solid #000;
+      color: black;
+    }
+    
+    #rules-content h2 {
+      color: #ffc400;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+    }
+    
+    #rules-content h3 {
+      color: #ffc400;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
+    
+    #rules-content p, #rules-content ul {
+      margin-bottom: 15px;
+      line-height: 1.5;
+      font-size: 0.9em;
+    }
+    
+    #rules-content ul {
+      padding-left: 20px;
+    }
+    
+    #rules-content li {
+      margin-bottom: 8px;
+    }
+    
+    .regulation-section {
+      margin-bottom: 20px;
+    }
+    
+    .points-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    
+    .points-table th, .points-table td {
+      border: 1px solid #ffc400;
+      padding: 8px;
+      text-align: left;
+    }
+    
+    .points-table th {
+      background-color: rgba(255, 196, 0, 0.2);
+    }
+    
+    .light-mode .points-table th, 
+    .light-mode .points-table td {
+      border-color: #000;
+    }
+    
+    .light-mode .points-table th {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    #close-rules {
+      margin-top: 20px;
+      background: #ffc400;
+      color: black;
+      padding: 10px 20px;
+      border: none;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 5px;
+      -webkit-appearance: none;
+      font-family: 'DINBlack', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'DINBlack', sans-serif;
+      background-color: #000;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      -webkit-text-size-adjust: 100%;
+      min-height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Light mode styles */
+    body.light-mode {
+      background-color: white;
+      color: black;
+    }
+    
+    body.light-mode .cell {
+      background: #000;
+      color: white;
+      border-color: #ffc400;
+    }
+    
+    body.light-mode .challenge-text {
+      color: white;
+      font-weight: 900;
+    }
+    
+    body.light-mode .letter-cell {
+      color: black;
+      font-weight: 900;
+    }
+    
+    body.light-mode #install-btn {
+      background: #000;
+      color: #ffc400;
+    }
+
+    /* Updated Title Styles */
+    .title-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    
+    h1 {
+      color: #ffc400; /* Always stays #ffc400 */
+      text-align: center;
+      margin: 0;
+      font-size: 1.5em;
+      width: 100%;
+      max-width: 500px;
+      padding: 0 20px;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Updated PRINTSCREEN button styles */
+    #download-btn {
+      margin-bottom: 20px;
+      background: #ffc400;
+      color: white; /* White text in dark mode */
+      padding: 10px 20px;
+      border: none;
+      font-size: 1em;
+      font-weight: 900;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: color 0.3s;
+      -webkit-appearance: none;
+    }
+    
+    body.light-mode #download-btn {
+      color: black; /* Black text in light mode */
+    }
+
+    #install-btn {
+      margin-top: 20px;
+      background: #ffc400;
+      color: black;
+      padding: 10px 20px;
+      border: none;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 5px;
+      display: none;
+      -webkit-appearance: none;
+    }
+
+    .board-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      transform-origin: top center;
+      -webkit-transform-origin: top center;
+    }
+
+    .bingo-header {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 8px;
+    }
+
+    .letter-cell {
+      background-color: #ffc400;
+      color: white;
+      font-size: 1.5em;
+      font-weight: 900;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      aspect-ratio: 1 / 1;
+      border: 2px solid #ffc400;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .cell {
+      background: white;
+      color: black;
+      border: 2px solid #ffc400;
+      position: relative;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-size: 0.65em;
+      font-weight: 700;
+      overflow: hidden;
+      padding: 2px;
+      box-sizing: border-box;
+      word-break: break-word;
+      hyphens: auto;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* Corner cells with gray background */
+    .cell.corner-cell {
+      background-color: #9C9C9C !important;
+    }
+    
+    .light-mode .cell.corner-cell {
+      background-color: #9C9C9C !important;
+    }
+
+    @media (max-width: 480px) {
+      .cell {
+        font-size: 0.55em;
+        padding: 1px;
+      }
+      .challenge-text {
+        font-size: 0.9em;
+      }
+    }
+
+    .cell img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 5px;
+    }
+
+    #free-cell img {
+      max-width: 110%;
+      max-height: 110%;
+      object-fit: scale-down;
+    }
+
+    .remove-btn {
+      background: #ffc400;
+      color: #FFFFFF;
+      border: 1px solid #ffc400;
+      top: 5px;
+      right: 5px;
+      padding: 3px 6px;
+      font-size: 0.7em;
+      cursor: pointer;
+      position: absolute;
+      z-index: 2;
+      display: none;
+      -webkit-appearance: none;
+    }
+
+    .cell.show-remove .remove-btn {
+      display: block;
+    }
+
+    .challenge-text {
+      z-index: 1;
+      padding: 2px;
+      font-size: 0.75em;
+      font-weight: 700;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-line-clamp: 6;
+      -webkit-box-orient: vertical;
+      line-height: 1.2;
+      transition: color 0.3s;
+    }
+
+    .hide-temp {
+      display: none !important;
+    }
+
+    /* Photo source selection dialog */
+    .photo-source-dialog {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .photo-source-btn {
+      background: #ffc400;
+      color: black;
+      padding: 15px 30px;
+      border: none;
+      font-size: 1.2em;
+      margin: 10px;
+      width: 80%;
+      max-width: 300px;
+      border-radius: 5px;
+      cursor: pointer;
+      -webkit-appearance: none;
+    }
+
+    .photo-source-cancel {
+      background: #333;
+      color: white;
+    }
+
+    /* iOS specific fixes */
+    @supports (-webkit-touch-callout: none) {
+      body {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      
+      #theme-toggle, #rules-toggle {
+        bottom: calc(20px + env(safe-area-inset-bottom));
+      }
+      
+      .cell {
+        -webkit-transform: translateZ(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Splash Screen (now lasts 2 seconds) -->
+  <div id="splash-screen">
+    <img id="splash-logo" src="logo.png" alt="Academia TUU Logo">
+  </div>
+
+  <!-- Rules Toggle Button -->
+  <button id="rules-toggle" aria-label="Mostrar regulamento">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+      <path d="M12 1l9.5 5.5v11L12 23l-9.5-5.5v-11L12 1zm0 2.311L4.5 7.653v8.694l7.5 4.342 7.5-4.342V7.653L12 3.311zM12 16a4 4 0 110-8 4 4 0 010 8zm0-2a2 2 0 100-4 2 2 0 000 4z"/>
+    </svg>
+  </button>
+
+  <!-- Theme Toggle Button -->
+  <button id="theme-toggle" aria-label="Toggle dark/light mode">
+    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1-8.313-12.454z"/>
+    </svg>
+    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black">
+      <path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93zM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121zm2.121-14.85l1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121zM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/>
+    </svg>
+  </button>
+
+  <!-- Rules Dialog -->
+  <div id="rules-dialog">
+    <div id="rules-content">
+      <h2>REGULAMENTO</h2>
+      <div class="regulation-section">
+        <h3>INTRODUÇÃO</h3>
+        <p>Este ano, o desafio de gamificação da Academia TUU ganha uma nova forma: um Bingo Fotográfico. Ao longo da semana, os academistas terão de completar desafios representados nos quadrados de um cartão de bingo — e comprovar cada um com uma foto criativa. Quanto mais quadrados completares, mais pontos acumulas. E sim… há prémio para quem fizer "BINGO"!</p>
+      </div>
+      
+      <div class="regulation-section">
+        <h3>COMO FUNCIONA</h3>
+        <p>Cada participante irá receber um cartão de bingo digital com diferentes desafios a completar.</p>
+        <p>Para cada quadrado completado, deverás:</p>
+        <ul>
+          <li>Tirar uma foto como prova</li>
+          <li>Submeter a foto para validação junto da organização</li>
+        </ul>
+      </div>
+      
+      <div class="regulation-section">
+        <h3>PONTUAÇÃO</h3>
+        <table class="points-table">
+          <tr>
+            <th>Ação</th>
+            <th>Pontos</th>
+          </tr>
+          <tr>
+            <td>Cada quadrado preenchido</td>
+            <td>+10 pontos</td>
+          </tr>
+          <tr>
+            <td>Linha completa (horizontal)</td>
+            <td>+100 pontos</td>
+          </tr>
+          <tr>
+            <td>Cartão completo (bingo total)</td>
+            <td>+100 pontos</td>
+          </tr>
+          <tr>
+            <td>Desafios dos cantos – 1º lugar</td>
+            <td>+100 pontos</td>
+          </tr>
+          <tr>
+            <td>Desafios dos cantos – 2º lugar</td>
+            <td>+75 pontos</td>
+          </tr>
+          <tr>
+            <td>Desafios dos cantos – 3º lugar</td>
+            <td>+50 pontos</td>
+          </tr>
+        </table>
+      </div>
+      
+      <div class="regulation-section">
+        <h3>CRITÉRIOS DE DESEMPATE</h3>
+        <p>Em caso de empate na pontuação final:</p>
+        <ol>
+          <li>Ganha quem completou o bingo completo mais cedo;</li>
+          <li>Se ainda assim houver empate, a organização pode propor um desafio final de desempate.</li>
+        </ol>
+      </div>
+      
+      <div class="regulation-section">
+        <h3>REGRAS GERAIS</h3>
+        <ul>
+          <li>Todos os academistas estão automaticamente inscritos na gamificação.</li>
+          <li>A participação é individual, salvo indicação contrária.</li>
+          <li>A equipa da TUU irá validar cada desafio e controlar a pontuação.</li>
+          <li>Qualquer tentativa de fraude implicará desclassificação imediata.</li>
+          <li>Os resultados serão anunciados durante o jantar de encerramento, no dia 24 de julho.</li>
+          <li>O jogo valerá até dia 24 as 12:00 AM.</li>
+        </ul>
+      </div>
+      
+      <div class="regulation-section">
+        <h3>PREMIAÇÃO</h3>
+        <p>Os participantes com maior pontuação receberão prémios surpresa no jantar final.</p>
+        <p>Vais precisar de atenção, criatividade, ousadia — e boa disposição para completar o teu BINGO.</p>
+        <p><strong>Atenção!</strong></p>
+        <p>Não basta marcar. Tens de provar com foto.</p>
+        <p>E não vale repetir poses. Inovação conta (e muito).</p>
+        <p>Boa sorte!</p>
+        <p>Academia TUU 2025</p>
+      </div>
+    </div>
+    <button id="close-rules">FECHAR</button>
+  </div>
+
+  <!-- Centered Title -->
+  <div class="title-container">
+    <h1>Desafio Gamificação Academia TUU 2025</h1>
+  </div>
+
+  <button id="download-btn">PRINTSCREEN</button>
+
+  <div class="board-wrapper">
+    <div class="bingo-header">
+      <div class="letter-cell">B</div>
+      <div class="letter-cell">I</div>
+      <div class="letter-cell">N</div>
+      <div class="letter-cell">G</div>
+      <div class="letter-cell">O</div>
+    </div>
+    <div class="board" id="board"></div>
+  </div>
+
+  <button id="install-btn">INSTALAR APLICAÇÃO</button>
+
+  <!-- Photo source selection dialog -->
+  <div id="photoSourceDialog" class="photo-source-dialog" style="display: none;">
+    <button id="cameraBtn" class="photo-source-btn">TIRAR FOTO</button>
+    <button id="galleryBtn" class="photo-source-btn">ESCOLHER DA GALERIA</button>
+    <button id="cancelPhotoBtn" class="photo-source-btn photo-source-cancel">CANCELAR</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+    const FREE_IMAGE = 'logo.png';
+    const board = document.getElementById('board');
+    const downloadBtn = document.getElementById('download-btn');
+    const installBtn = document.getElementById('install-btn');
+    const photoSourceDialog = document.getElementById('photoSourceDialog');
+    const cameraBtn = document.getElementById('cameraBtn');
+    const galleryBtn = document.getElementById('galleryBtn');
+    const cancelPhotoBtn = document.getElementById('cancelPhotoBtn');
+    const splashScreen = document.getElementById('splash-screen');
+    const themeToggle = document.getElementById('theme-toggle');
+    const rulesToggle = document.getElementById('rules-toggle');
+    const rulesDialog = document.getElementById('rules-dialog');
+    const closeRules = document.getElementById('close-rules');
+
+    // Reordered challenges with the requested swaps:
+    // 1. "INVENTAR UM POEMA OU REFRÃO PARA A ACADEMIA" swapped with "TIRAR UMA FOTO COM ALGUÉM COM A CAMISOLA DA ACADÉMICA"
+    // 2. "TIRAR FOTO A UM CÃO" swapped with "RECRIAR O LOGO DA TUU COM O CORPO DE VÁRIOS PARTICIPANTES"
+    const challenges = [
+      "CRIAR UMA MASCOTE PARA A ACADEMIA", // Top-left corner (0)
+      "TIRAR UMA FOTO COM UMA LONA DE OBRA DA TUU.",
+      "CONSTRUIR UMA PEQUENA ESTRUTURA COM LÁPIS/CANETA.",
+      "TIRAR UMA FOTO COM O TEU GRUPO DO DESAFIO DE EMPREENDEDORISMO.",
+      "TIRAR FOTO QUE REPRESENTE A ACADEMIA", // Top-right corner (4)
+      "FAZER UM PENTEADO DIFERENTE A OUTRO PARTICIPANTE.",
+      "ENCONTRAR ALGUÉM QUE ESTEJA A USAR A MESMA COR QUE TU.",
+      "TIRAR FOTO COM MAIS DE 30 PESSOAS.",
+      "IMITAR UMA ESTÁTUA AO LADO DELA.",
+      "TIRAR UMA FOTO COM ALGUÉM COM A CAMISOLA DA ACADÉMICA.", // Swapped with "INVENTAR UM POEMA..." (now position 9)
+      "ENCONTRAR UM ESTRANHO COM UM BOM BIGODE.",
+      "ENCONTRAR UM METRO BUS.",
+      "FREE",
+      "TIRAR FOTO A UM CÃO.", // Swapped with "RECRIAR O LOGO..." (now position 13)
+      "ENCONTRAR UM MUPI DA ACADEMIA.",
+      "TIRAR FOTO COM UM TUU.",
+      "TIRAR FOTO COM UM ORADOR.",
+      "ENCONTRAR UM PARTICIPANTE COM MEIAS ENGRAÇADAS.",
+      "DAR UMA LEMBRANÇA A OUTRO PARTICIPANTE.",
+      "TIRAR FOTO A UMA STREET ART.",
+      "INVENTAR UM POEMA OU REFRÃO PARA A ACADEMIA.", // Swapped with "TIRAR UMA FOTO COM ALGUÉM..." (now position 20)
+      "ENCONTRAR UM PARTICIPANTE QUE TENHA UMA TATUAGEM.",
+      "TIRAR FOTO COM UMA OBRA DA TUU TERMINADA.",
+      "VISITAR UM MONUMENTO CONHECIDO.",
+      "RECRIAR O LOGO DA TUU COM O CORPO DE VÁRIOS PARTICIPANTES." // Swapped with "TIRAR FOTO A UM CÃO" (now position 24)
+    ];
+
+    // Indexes of corner cells (0, 4, 20, 24 in a 5x5 grid)
+    const cornerIndexes = [0, 4, 20, 24];
+
+    let db;
+    let currentCellIndex = null;
+    let clickTimeout = null;
+
+    // Theme toggle functionality
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('light-mode');
+      const isLightMode = document.body.classList.contains('light-mode');
+      localStorage.setItem('lightMode', isLightMode);
+    });
+
+    // Rules dialog functionality
+    rulesToggle.addEventListener('click', () => {
+      rulesDialog.style.display = 'flex';
+    });
+
+    closeRules.addEventListener('click', () => {
+      rulesDialog.style.display = 'none';
+    });
+
+    // Check for saved theme preference
+    if (localStorage.getItem('lightMode') === 'true') {
+      document.body.classList.add('light-mode');
+    }
+
+    // Extended splash screen (2 seconds)
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        splashScreen.style.opacity = '0';
+        setTimeout(() => {
+          splashScreen.style.display = 'none';
+        }, 300);
+      }, 2000);
+    });
+
+    // PWA install prompt event
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'inline-block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      installBtn.style.display = 'none';
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('Usuário aceitou instalar a app');
+        } else {
+          console.log('Usuário recusou instalar a app');
+        }
+        deferredPrompt = null;
+      }
+    });
+
+    // IndexedDB functions
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open('BingoDB', 1);
+        request.onupgradeneeded = (e) => {
+          db = e.target.result;
+          db.createObjectStore('images');
+        };
+        request.onsuccess = (e) => {
+          db = e.target.result;
+          resolve();
+        };
+        request.onerror = reject;
+      });
+    }
+
+    function saveImage(index, dataUrl) {
+      const tx = db.transaction('images', 'readwrite');
+      const store = tx.objectStore('images');
+      store.put(dataUrl, index);
+      tx.oncomplete = renderBoard;
+    }
+
+    function getImage(index) {
+      return new Promise((resolve) => {
+        const tx = db.transaction('images', 'readonly');
+        const store = tx.objectStore('images');
+        const req = store.get(index);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+      });
+    }
+
+    function deleteImage(index) {
+      const tx = db.transaction('images', 'readwrite');
+      const store = tx.objectStore('images');
+      store.delete(index);
+      tx.oncomplete = renderBoard;
+    }
+
+    function handleCellClick(index, hasImage, event) {
+      if (event.target.classList.contains('remove-btn')) {
+        return;
+      }
+
+      if (hasImage) {
+        event.currentTarget.classList.toggle('show-remove');
+        clearTimeout(clickTimeout);
+        clickTimeout = setTimeout(() => {
+          event.currentTarget.classList.remove('show-remove');
+        }, 3000);
+      } else {
+        showPhotoSourceDialog(index);
+      }
+    }
+
+    function showPhotoSourceDialog(index) {
+      currentCellIndex = index;
+      photoSourceDialog.style.display = 'flex';
+    }
+
+    function hidePhotoSourceDialog() {
+      photoSourceDialog.style.display = 'none';
+      currentCellIndex = null;
+    }
+
+    function createFileInput(accept, capture = null) {
+      return new Promise((resolve) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = accept;
+        
+        if (capture) {
+          input.capture = capture;
+        }
+
+        input.onchange = (e) => {
+          const file = e.target.files[0];
+          if (file && currentCellIndex !== null) {
+            const reader = new FileReader();
+            reader.onload = () => {
+              saveImage(currentCellIndex, reader.result);
+              hidePhotoSourceDialog();
+            };
+            reader.readAsDataURL(file);
+          } else {
+            hidePhotoSourceDialog();
+          }
+        };
+
+        document.body.appendChild(input);
+        input.click();
+        
+        setTimeout(() => {
+          if (!input.value) {
+            hidePhotoSourceDialog();
+          }
+          document.body.removeChild(input);
+        }, 10000);
+      });
+    }
+
+    // Event listeners for photo source buttons
+    cameraBtn.addEventListener('click', () => {
+      createFileInput('image/*', 'environment');
+    });
+
+    galleryBtn.addEventListener('click', () => {
+      createFileInput('image/*');
+    });
+
+    cancelPhotoBtn.addEventListener('click', hidePhotoSourceDialog);
+
+    async function renderBoard() {
+      board.innerHTML = '';
+      for (let i = 0; i < challenges.length; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+
+        // Add corner-cell class to the four corner cells
+        if (cornerIndexes.includes(i)) {
+          cell.classList.add('corner-cell');
+        }
+
+        if (i === 12) {
+          cell.id = 'free-cell';
+        }
+
+        if (challenges[i] === "FREE") {
+          const img = document.createElement('img');
+          img.src = FREE_IMAGE;
+          img.alt = "Free Space";
+          cell.appendChild(img);
+        } else {
+          const imgData = await getImage(i);
+          if (imgData) {
+            const img = document.createElement('img');
+            img.src = imgData;
+            cell.appendChild(img);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.textContent = 'Remover';
+            removeBtn.onclick = (e) => {
+              e.stopPropagation();
+              deleteImage(i);
+            };
+            cell.appendChild(removeBtn);
+
+            cell.onclick = (e) => handleCellClick(i, true, e);
+          } else {
+            const label = document.createElement('div');
+            label.className = 'challenge-text';
+            label.textContent = challenges[i];
+            cell.appendChild(label);
+
+            cell.onclick = (e) => handleCellClick(i, false, e);
+          }
+        }
+
+        board.appendChild(cell);
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.cell.show-remove') && !e.target.closest('.photo-source-dialog') && !e.target.closest('#rules-dialog')) {
+        document.querySelectorAll('.cell.show-remove').forEach(cell => {
+          cell.classList.remove('show-remove');
+        });
+      }
+    });
+
+    // Updated PRINTSCREEN function with high quality output
+    downloadBtn.addEventListener('click', () => {
+      document.querySelectorAll('.cell.show-remove').forEach(cell => {
+        cell.classList.remove('show-remove');
+      });
+
+      // Hide buttons temporarily
+      document.querySelectorAll('#download-btn, #install-btn, #theme-toggle, #rules-toggle').forEach(el => {
+        el.style.visibility = 'hidden';
+      });
+
+      // Configure html2canvas for high quality output
+      html2canvas(document.querySelector('.board-wrapper'), {
+        scale: 3, // Higher scale for better quality
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: document.body.classList.contains('light-mode') ? '#ffffff' : '#000000',
+        onclone: (clonedDoc) => {
+          if (document.body.classList.contains('light-mode')) {
+            clonedDoc.body.classList.add('light-mode');
+          }
+        }
+      }).then(canvas => {
+        // Create a temporary canvas to ensure proper dimensions
+        const tempCanvas = document.createElement('canvas');
+        const ctx = tempCanvas.getContext('2d');
+        
+        // Set dimensions maintaining aspect ratio
+        const maxWidth = 1500;
+        const ratio = Math.min(maxWidth / canvas.width, 1);
+        tempCanvas.width = canvas.width * ratio;
+        tempCanvas.height = canvas.height * ratio;
+        
+        // Draw with high quality
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+        
+        // Download the image
+        const link = document.createElement('a');
+        link.download = 'bingo_academia_tuu_2025.png';
+        link.href = tempCanvas.toDataURL('image/png', 1.0);
+        link.click();
+
+        // Restore buttons
+        document.querySelectorAll('#download-btn, #install-btn, #theme-toggle, #rules-toggle').forEach(el => {
+          el.style.visibility = 'visible';
+        });
+      });
+    });
+
+    // Start the app after extended splash screen (2 seconds)
+    setTimeout(() => {
+      openDB().then(renderBoard);
+    }, 2000);
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker registrado'))
+        .catch(err => console.error('Erro no SW:', err));
+    }
+
+    // iOS install instructions
+    if (navigator.userAgent.match(/(iPhone|iPad|iPod)/i)) {
+      const isStandalone = window.navigator.standalone === true;
+      if (!isStandalone) {
+        setTimeout(() => {
+          const installAlert = document.createElement('div');
+          installAlert.style.position = 'fixed';
+          installAlert.style.bottom = '0';
+          installAlert.style.background = '#ffc400';
+          installAlert.style.color = '#000';
+          installAlert.style.padding = '10px';
+          installAlert.style.textAlign = 'center';
+          installAlert.style.fontWeight = 'bold';
+          installAlert.style.width = '100%';
+          installAlert.style.zIndex = '9999';
+          installAlert.textContent = 'Para instalar este app, toque no ícone de compartilhar do Safari e depois em "Adicionar à Tela de Início".';
+          document.body.appendChild(installAlert);
+
+          setTimeout(() => {
+            installAlert.style.display = 'none';
+          }, 15000);
+        }, 2000);
+      }
+    }
+  </script>
+</body>
+</html>
